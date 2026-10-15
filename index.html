@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Purchase Order</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+@page { size: A4; margin: 0; }
+
+body {
+    width: 100%;
+    margin: 0;
+    font-family: Philosopher, Arial, sans-serif;
+    background: #eee;
+}
+
+/* Buttons (not printed) */
+.buttons { text-align: center; margin: 15px; }
+button {
+    padding: 8px 12px;
+    margin: 5px;
+    background: #badecb;
+    border: 1px solid white;
+    cursor: pointer;
+}
+
+/* Input Table */
+#poTable {
+    width: 95%;
+    margin: 10px auto;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: Philosopher;
+}
+#poTable th, #poTable td {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+    font-family: Philosopher;
+}
+#poTable td {
+    background: white;
+}
+
+#poTable th { background: #D8D8D8; }
+input { width: 95%; border: none; font-family: Philosopher; outline: none;}
+
+/* A4 Print Area */
+#printArea {
+    width: 210mm;
+    height: 297mm;
+    margin: auto;
+    padding: 0 25px 0;
+    position: relative;
+    background: white;
+}
+th {
+    background-color: #D8D8D8;
+    white-space: nowrap;
+}
+
+/* Letterhead */
+.letterhead-bg {
+    position: absolute;
+    width: 210mm;
+    height: 297mm;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    z-index: 0;
+}
+
+/* Content Layer */
+.content {
+    position: relative;
+    z-index: 1;
+    padding: 60mm 20mm 20mm 20mm;
+}
+
+.pocustomer { font-weight: bold; font-size: 13px; }
+.podate { text-align: right; font-weight: bold; font-size: 16px; }
+.poo { text-align: center; font-size: 16px; font-weight: bold; margin: 8px 0; }
+
+#toPrint {
+    font-size: 15px;
+    margin: 10px 10px 20px;
+    white-space: pre-line;
+    line-height: 17px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Preview Table */
+#previewPoTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    font-family: "philosopher";
+}
+#previewPoTable th, #previewPoTable td {
+    border: 1px solid black;
+    padding: 4px;
+    text-align: center;
+}
+.description2 { text-align: left !important; }
+
+#previewTotalAmount {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* Signature Styling */
+.sig-img {
+    height: 70px;
+    display: block;
+    margin: 0px 10px;
+}
+
+/* Print Configuration */
+@media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; left: 0; top: 0; }
+    
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    #previewPoTable th {
+        background-color: #D8D8D8 !important;
+        color: black !important;
+    }
+
+    #previewPoTable td {
+        color: black !important;
+    }
+
+    #previewPoTable, 
+    #previewPoTable th, 
+    #previewPoTable td {
+        border: 1.2px solid black !important;
+    }
+
+    #toPrint {
+        color: black !important;
+    }
+}
+
+#divto {
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<h3 style="text-align:center;">Purchase Order Editor</h3>
+  
+<div style="text-align:center; margin-top:10px;">
+  Date: <input type="text" id="dateInput" value="Date: " style="width: 200px; margin-top: 5px; font-size: 15px;"><br/>
+  Title: <input type="text" id="pooInput" value="BILL" style="width: 200px; margin-top: 5px; font-size: 15px;">
+</div>
+
+<div id="divto">
+  To:
+  <textarea id="toInput" rows="3" style="width:200px; font-family:Philosopher; margin-top: 5px; font-size: 15px;"></textarea>
+</div>
+
+<table id="poTable">
+<thead>
+<tr>
+<th>Sl</th><th>Description</th><th>Unit</th><th>Qty</th><th>Unit Price</th><th>Amount</th><th>❌</th>
+</tr>
+</thead>
+<tbody id="poBody"></tbody>
+<tfoot>
+<tr><td colspan="5" align="right"><b>Total</b></td><td id="totalAmount">0</td></tr>
+</tfoot>
+</table>
+
+<div style="text-align:center;">
+  <button onclick="addRow()">➕ Add Row</button>
+  <button onclick="toggleSignature()">✒️ Toggle Digital Signature</button>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea">
+  
+<img id="letterheadImg" alt="Letterhead" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjKPFKFEJj-JGCfH36odQYbJjdyeFPUFJOfUSh58u7gCRAbvNMSVawFSuDeFt1HSil-XZDWocMvI_adh7uea7v9DzCVbEJeu2P72G13XQ4Ni4zGqjr6FEaewfhmuE-MinRunaaDEHp4aBnb3qA1vLNCFWr-AOptU-rLQEHs-LJMIoN44aqTOFBtr5u1gBaR/s1600/ACI%20Pad_2.jpg" class="letterhead-bg">
+
+<div class="content">
+  <div id="toPrint">To,
+ Well Park Resort,
+ Kolatoli, Cox’s Bazar</div>
+  <div class="podate" id="podate">Date:ㅤ</div>
+  <div class="poo" id="poo"><u>PURCHASE ORDER</u></div>
+
+  <table id="previewPoTable">
+  <thead>
+  <tr>
+  <th>Sl</th><th>Description</th><th>Unit</th><th>Qty</th><th>Unit Price</th><th>Amount</th>
+  </tr>
+  </thead>
+  <tbody id="previewPoBody"></tbody>
+  <tfoot>
+  <tr><td colspan="5"><b>Total Amount</b></td><td id="previewTotalAmount">0</td></tr>
+  </tfoot>
+  </table>
+  
+  <div id="amountWords" style="margin-top: 12px; font-size: 15px; font-weight: bold; text-align: left;">
+      Total In Words: Zero Taka Only.
+  </div>
+  
+  <br/>
+  <div id="signay" style="margin-top: 20px; font-size: 15px; text-align: left;">
+    <b>Regards,</b>
+    <div id="signatureContainer"></div>
+    <b>AYNUL MANNAN</b><br/>
+    Executive - Corporate Sales, Cox’s Bazar<br/>
+    <b>ACI Consumer Brands Division</b><br/>
+    Phone: <b>+8801861-260700</b><br/>
+    E-mail: aynul.mannan@aci-bd.com<br/>
+  </div>
+
+</div>
+</div>
+
+<div class="buttons">
+    <button onclick="window.print()">🖨 Save as PDF</button>
+</div>
+
+<script>
+let showDigitalSignature = true;
+const signatureUrl = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirY43D856faMBRJoIdMXPVJ9nBzfs0CtWKchFt6MIvMesYTQneRWyl8R4kl19esHF670d8nnNEBRnncRoFe9__W-o_T2fy-y45ZYuq5lUcoOAoWdr4H8s30ocVmovJsSgINHimptU_oZhSKksBgUY3wcgzSkyh_yLPjdkdwyVQiDSqZy7g-3ykHnxwJY8K/s1600/1000190707.jpg";
+
+function updateSignatureView() {
+    const container = document.getElementById("signatureContainer");
+    if (showDigitalSignature) {
+        container.innerHTML = `<img src="${signatureUrl}" alt="Digital Signature" class="sig-img">`;
+    } else {
+        container.innerHTML = "<br/><br/><br/>";
+    }
+}
+
+function toggleSignature() {
+    showDigitalSignature = !showDigitalSignature;
+    updateSignatureView();
+    saveData();
+}
+
+dateInput.oninput = () => { podate.textContent = dateInput.value; saveData(); };
+pooInput.oninput = () => { poo.innerHTML = `<u>${pooInput.value}</u>`; saveData(); };
+toInput.oninput = () => { toPrint.textContent = "To,\n" + toInput.value; saveData(); };
+
+function addRow(data = {}) {
+    let r = poBody.insertRow();
+    r.innerHTML = `<td></td>
+    <td><input class="description" value="${data.description || ''}" oninput="calc(this)"></td>
+    <td><input class="unit" value="${data.unit || 'PCS'}" oninput="saveData()"></td>
+    <td><input class="quantity" value="${data.quantity || ''}" oninput="calc(this)"></td>
+    <td><input class="unitPrice" value="${data.unitPrice || ''}" oninput="calc(this)"></td>
+    <td class="amount">${data.amount || '0'}</td>
+    <td onclick="this.parentElement.remove(); updateAll();" style="color:red;cursor:pointer;">❌</td>`;
+    
+    if (data.quantity || data.unitPrice) {
+        let q = parseFloat(data.quantity) || 0;
+        let p = parseFloat(data.unitPrice) || 0;
+        r.querySelector(".amount").innerText = (q * p).toFixed(2);
+    }
+    
+    updateAll();
+}
+
+function calc(el) {
+    let r = el.parentElement.parentElement;
+    r.querySelector(".amount").innerText = (r.querySelector(".quantity").value * r.querySelector(".unitPrice").value || 0).toFixed(2);
+    updateAll();
+}
+
+function numberToWords(num) {
+    const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+        "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+    function inWords(n) {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+        if (n < 1000) return a[Math.floor(n / 100)] + " Hundred " + (n % 100 ? inWords(n % 100) : "");
+        if (n < 100000) return inWords(Math.floor(n / 1000)) + " Thousand " + (n % 1000 ? inWords(n % 1000) : "");
+        if (n < 10000000) return inWords(Math.floor(n / 100000)) + " Lakh " + (n % 100000 ? inWords(n % 100000) : "");
+        return inWords(Math.floor(n / 10000000)) + " Crore " + (n % 10000000 ? inWords(n % 10000000) : "");
+    }
+
+    return (inWords(Math.floor(num)) || "Zero") + " Taka Only.";
+}
+
+function updateAll() {
+    [...poBody.rows].forEach((r, i) => r.cells[0].innerText = i + 1);
+
+    let total = 0, preview = "";
+
+    [...poBody.rows].forEach((r, i) => {
+        let amt = parseFloat(r.querySelector(".amount").innerText) || 0;
+        total += amt;
+
+        preview += `<tr>
+        <td>${i + 1}</td>
+        <td class="description2">${r.querySelector(".description").value}</td>
+        <td>${r.querySelector(".unit").value}</td>
+        <td>${r.querySelector(".quantity").value}</td>
+        <td>${r.querySelector(".unitPrice").value}</td>
+        <td>${amt.toFixed(2)}</td></tr>`;
+    });
+
+    previewPoBody.innerHTML = preview;
+    totalAmount.innerText = total.toFixed(2);
+    previewTotalAmount.innerText = total.toFixed(2);
+
+    document.getElementById("amountWords").innerText =
+        "Total In Words: " + numberToWords(total);
+
+    saveData();
+}
+
+function saveData() {
+    const data = {
+        date: dateInput.value,
+        title: pooInput.value,
+        to: toInput.value,
+        showDigitalSignature: showDigitalSignature,
+        rows: []
+    };
+
+    [...poBody.rows].forEach(r => {
+        data.rows.push({
+            description: r.querySelector(".description").value,
+            unit: r.querySelector(".unit").value,
+            quantity: r.querySelector(".quantity").value,
+            unitPrice: r.querySelector(".unitPrice").value,
+            amount: r.querySelector(".amount").innerText
+        });
+    });
+
+    localStorage.setItem("poFormData", JSON.stringify(data));
+}
+
+function loadData() {
+    const savedData = localStorage.getItem("poFormData");
+
+    if (savedData) {
+        const data = JSON.parse(savedData);
+
+        if (data.date !== undefined) dateInput.value = data.date;
+        if (data.title !== undefined) pooInput.value = data.title;
+        if (data.to !== undefined) toInput.value = data.to;
+        if (data.showDigitalSignature !== undefined) showDigitalSignature = data.showDigitalSignature;
+
+        podate.textContent = dateInput.value;
+        poo.innerHTML = `<u>${pooInput.value}</u>`;
+        toPrint.textContent = "To,\n" + toInput.value;
+
+        poBody.innerHTML = "";
+        
+        if (data.rows && data.rows.length > 0) {
+            data.rows.forEach(rowData => addRow(rowData));
+        } else {
+            addRow();
+        }
+    } else {
+        addRow();
+    }
+    updateSignatureView();
+}
+
+const imgUrls = [
+    "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjKPFKFEJj-JGCfH36odQYbJjdyeFPUFJOfUSh58u7gCRAbvNMSVawFSuDeFt1HSil-XZDWocMvI_adh7uea7v9DzCVbEJeu2P72G13XQ4Ni4zGqjr6FEaewfhmuE-MinRunaaDEHp4aBnb3qA1vLNCFWr-AOptU-rLQEHs-LJMIoN44aqTOFBtr5u1gBaR/s1600/ACI%20Pad_2.jpg",
+    "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjCqmJI50lA37rUh8nnXWBJLraww_x46SgRPfGEN6jtgaJUWJAxCHkkRFLscDGOh02r5UpPOzlV5Lmz_Gh3RrRMWwQTlzSdJg74YwwW-5tOxyh2-fL6WsHWFAptW_ddO1h4t8g6rEv6sS7KTgjc3-xHazLz7LF2LBvyOQmVusKtwxXJ5BZO1Fyf6a7kduUX/s1600/Bill_1%20%281%29.jpg",
+    "https://cdn.site.com/images/custom-3.webp",
+    "https://img.host.io/assets/lh-final.jpg"
+];
+
+document.getElementById("letterheadImg").src = imgUrls[0];
+loadData();
+</script>
+
+</body>
+</html>
